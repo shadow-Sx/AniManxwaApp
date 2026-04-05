@@ -1,5 +1,5 @@
 import os
-from mega import Mega
+import mega
 from flask import Flask, send_file, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -10,8 +10,8 @@ app = Flask(__name__)
 CORS(app)
 
 # Mega.nz ga ulanish
-mega = Mega()
-m = mega.login(os.getenv('MEGA_EMAIL'), os.getenv('MEGA_PASSWORD'))
+mega_client = mega.Mega()
+m = mega_client.login(os.getenv('MEGA_EMAIL'), os.getenv('MEGA_PASSWORD'))
 
 @app.route('/mangas', methods=['GET'])
 def get_mangas():
