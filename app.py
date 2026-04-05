@@ -48,15 +48,22 @@ def upload_manga():
         # Mega.nz ga yuklash va public link olish
         
         # Test uchun placeholder link
-        cover_link = "https://via.placeholder.com/200x300?text=Cover"
-        
-        MANGA_DB[manga_id] = {
-            'title': data['title'],
-            'author': data['author'],
-            'type': data['type'],
-            'cover': cover_link,
-            'chapters': len(data.get('chapters', []))
+        MANGA_DB = {
+    'solo-leveling': {
+        'title': 'Solo Leveling',
+        'author': 'Chugong',
+        'type': 'bepul',
+        'cover': 'https://mega.nz/file/uK5mXYAK#aLtTAa30aJUxtYcB5EszmB2pk3i_rR2yVaHQRjfrD_s',  # cover link
+        'chapters': 179,
+        'pages': {
+            1: [
+                'https://mega.nz/file/iComSZQT#SbjDi-BxxOdrBas9J1zQM1PuiiGjHd4i2Y0kEuGIQ68',  # 001.png
+                'https://mega.nz/file/LK4xBQCT#2paCYkJni7s3KyModH4BjxNcvwdnmvnlxbe9T16dsV0',  # 002.png
+                # ... barcha sahifalar
+            ]
         }
+    }
+}
         
         return jsonify({'success': True, 'message': 'Manga yuklandi!', 'cover': cover_link})
     except Exception as e:
