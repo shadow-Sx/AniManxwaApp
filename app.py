@@ -11,8 +11,18 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-# Ma'lumotlar bazasi (vaqtincha)
+# Mega.nz API (public link yaratish uchun)
+MEGA_EMAIL = os.getenv('MEGA_EMAIL')
+MEGA_PASSWORD = os.getenv('MEGA_PASSWORD')
+
+# Vaqtincha ma'lumotlar bazasi
 MANGA_DB = {}
+
+def create_mega_public_link(file_id):
+    """Mega.nz da public link yaratish"""
+    # Mega.nz API orqali public link yaratish
+    # Hozircha test
+    return f"https://mega.nz/embed/{file_id}"
 
 @app.route('/mangas', methods=['GET'])
 def get_mangas():
@@ -34,16 +44,21 @@ def upload_manga():
         data = request.json
         manga_id = data['manga_id']
         
-        # Ma'lumotlarni saqlash
+        # Yuklangan rasmlarni saqlash
+        # Mega.nz ga yuklash va public link olish
+        
+        # Test uchun placeholder link
+        cover_link = "https://via.placeholder.com/200x300?text=Cover"
+        
         MANGA_DB[manga_id] = {
             'title': data['title'],
             'author': data['author'],
             'type': data['type'],
-            'cover': data['cover'],
-            'chapters': len(data['chapters'])
+            'cover': cover_link,
+            'chapters': len(data.get('chapters', []))
         }
         
-        return jsonify({'success': True, 'message': 'Manga yuklandi!'})
+        return jsonify({'success': True, 'message': 'Manga yuklandi!', 'cover': cover_link})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
