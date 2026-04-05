@@ -4,3 +4,4 @@ gunicorn
 python-dotenv
 requests
 mega.py
+tenacity>=8.2.0
