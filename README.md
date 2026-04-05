@@ -1,2 +1,0 @@
-# AniManxwaApp
-MANGA ILOVASI
