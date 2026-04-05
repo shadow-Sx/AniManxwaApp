@@ -1,103 +1,68 @@
 import os
-import mega
+import json
 from flask import Flask, send_file, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
+import requests
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# Mega.nz ga ulanish
-mega_client = mega.Mega()
-m = mega_client.login(os.getenv('MEGA_EMAIL'), os.getenv('MEGA_PASSWORD'))
+# Mega.nz login URL
+MEGA_EMAIL = os.getenv('MEGA_EMAIL')
+MEGA_PASSWORD = os.getenv('MEGA_PASSWORD')
+
+# Mega.nz login funksiyasi
+def mega_login():
+    # megasdk kutubxonasi bilan ishlash
+    # Hozircha public link orqali ishlaymiz
+    pass
 
 @app.route('/mangas', methods=['GET'])
 def get_mangas():
     """Barcha mangalar ro'yxatini olish"""
-    try:
-        mangas_folder = m.find('Mangas')
-        if not mangas_folder:
-            return jsonify([])
-        
-        mangas = []
-        for folder in mangas_folder.children:
-            if folder.is_dir:
-                info_file = folder.find('info.json')
-                if info_file:
-                    info = m.download(info_file)
-                    import json
-                    with open(info, 'r') as f:
-                        data = json.load(f)
-                    mangas.append({
-                        'id': folder.name,
-                        'title': data.get('title'),
-                        'author': data.get('author'),
-                        'type': data.get('type'),
-                        'cover': f'/cover/{folder.name}',
-                        'chapters': data.get('chapters', 0)
-                    })
-        return jsonify(mangas)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Test ma'lumotlar
+    test_mangas = [
+        {
+            'id': 'solo-leveling',
+            'title': 'Solo Leveling',
+            'author': 'Chugong',
+            'type': 'bepul',
+            'cover': '/cover/solo-leveling',
+            'chapters': 179
+        },
+        {
+            'id': 'naruto',
+            'title': 'Naruto',
+            'author': 'Masashi Kishimoto',
+            'type': 'obuna',
+            'cover': '/cover/naruto',
+            'chapters': 700
+        }
+    ]
+    return jsonify(test_mangas)
 
 @app.route('/cover/<manga_id>', methods=['GET'])
 def get_cover(manga_id):
     """Manga muqovasini olish"""
-    try:
-        manga = m.find(f'Mangas/{manga_id}')
-        cover = manga.find('cover.jpg')
-        if not cover:
-            cover = manga.find('cover.png')
-        file_path = m.download(cover)
-        return send_file(file_path, mimetype='image/jpeg')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 404
+    # Test rasm
+    return send_file('placeholder.jpg', mimetype='image/jpeg')
 
 @app.route('/page/<manga_id>/<path:page_path>', methods=['GET'])
 def get_page(manga_id, page_path):
-    """Sahifani olish (jild/bob/rasm)"""
-    try:
-        full_path = f'Mangas/{manga_id}/{page_path}'
-        file = m.find(full_path)
-        file_path = m.download(file)
-        return send_file(file_path, mimetype='image/png')
-    except Exception as e:
-        return jsonify({'error': str(e)}), 404
+    """Sahifani olish"""
+    return send_file('placeholder.jpg', mimetype='image/jpeg')
 
 @app.route('/chapters/<manga_id>', methods=['GET'])
 def get_chapters(manga_id):
     """Manga boblari ro'yxatini olish"""
-    try:
-        manga = m.find(f'Mangas/{manga_id}')
-        chapters = []
-        
-        # Jild va boblarni qidirish
-        for item in manga.children:
-            if item.is_dir:
-                if item.name.startswith('jild_'):
-                    # Jild ichidagi boblarni olish
-                    for subitem in item.children:
-                        if subitem.is_dir and subitem.name.startswith('bob_'):
-                            chapters.append({
-                                'volume': item.name,
-                                'chapter': subitem.name,
-                                'number': int(subitem.name.split('_')[1]),
-                                'pages': len(subitem.children)
-                            })
-                elif item.name.startswith('bob_'):
-                    chapters.append({
-                                'volume': None,
-                                'chapter': item.name,
-                                'number': int(item.name.split('_')[1]),
-                                'pages': len(item.children)
-                            })
-        
-        chapters.sort(key=lambda x: x['number'])
-        return jsonify(chapters)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    test_chapters = [
+        {'volume': None, 'chapter': 'bob_001', 'number': 1, 'pages': 30},
+        {'volume': None, 'chapter': 'bob_002', 'number': 2, 'pages': 28}
+    ]
+    return jsonify(test_chapters)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
