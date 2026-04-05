@@ -15,13 +15,19 @@ CORS(app)
 MEGA_EMAIL = os.getenv('MEGA_EMAIL')
 MEGA_PASSWORD = os.getenv('MEGA_PASSWORD')
 
-# Vaqtincha ma'lumotlar bazasi
-MANGA_DB = {}
+# Ma'lumotlar bazasi
+MANGA_DB = {
+    'solo-leveling': {
+        'title': 'Solo Leveling',
+        'author': 'Chugong',
+        'type': 'bepul',
+        'cover': 'https://mega.nz/embed/uK5mXYAK#aLtTAa30aJUxtYcB5EszmB2pk3i_rR2yVaHQRjfrD_s',
+        'chapters': 179
+    }
+}
 
 def create_mega_public_link(file_id):
     """Mega.nz da public link yaratish"""
-    # Mega.nz API orqali public link yaratish
-    # Hozircha test
     return f"https://mega.nz/embed/{file_id}"
 
 @app.route('/mangas', methods=['GET'])
@@ -44,28 +50,16 @@ def upload_manga():
         data = request.json
         manga_id = data['manga_id']
         
-        # Yuklangan rasmlarni saqlash
-        # Mega.nz ga yuklash va public link olish
-        
-        # Test uchun placeholder link
-        MANGA_DB = {
-    'solo-leveling': {
-        'title': 'Solo Leveling',
-        'author': 'Chugong',
-        'type': 'bepul',
-        'cover': 'https://mega.nz/file/uK5mXYAK#aLtTAa30aJUxtYcB5EszmB2pk3i_rR2yVaHQRjfrD_s',  # cover link
-        'chapters': 179,
-        'pages': {
-            1: [
-                'https://mega.nz/file/iComSZQT#SbjDi-BxxOdrBas9J1zQM1PuiiGjHd4i2Y0kEuGIQ68',  # 001.png
-                'https://mega.nz/file/LK4xBQCT#2paCYkJni7s3KyModH4BjxNcvwdnmvnlxbe9T16dsV0',  # 002.png
-                # ... barcha sahifalar
-            ]
+        # Yangi mangani ma'lumotlar bazasiga qo'shish
+        MANGA_DB[manga_id] = {
+            'title': data['title'],
+            'author': data['author'],
+            'type': data['type'],
+            'cover': data.get('cover', 'https://via.placeholder.com/200x300'),
+            'chapters': len(data.get('chapters', []))
         }
-    }
-}
         
-        return jsonify({'success': True, 'message': 'Manga yuklandi!', 'cover': cover_link})
+        return jsonify({'success': True, 'message': 'Manga yuklandi!', 'manga_id': manga_id})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
