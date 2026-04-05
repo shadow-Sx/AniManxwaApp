@@ -13,16 +13,28 @@ app.use(express.json());
 let mega = null;
 
 async function connectMega() {
-  mega = new Mega({
-    email: process.env.MEGA_EMAIL,
-    password: process.env.MEGA_PASSWORD
-  });
-  await mega.login();
-  console.log('✅ Mega.nz ga ulandi');
+  try {
+    console.log('🔌 Mega.nz ga ulanish...');
+    console.log('Email:', process.env.MEGA_EMAIL ? '✅ Bor' : '❌ Yo‘q');
+    console.log('Password:', process.env.MEGA_PASSWORD ? '✅ Bor' : '❌ Yo‘q');
+
+    mega = new Mega({
+      email: process.env.MEGA_EMAIL,
+      password: process.env.MEGA_PASSWORD
+    });
+    await mega.login();
+    console.log('✅ Mega.nz ga ulandi');
+  } catch (err) {
+    console.error('❌ Mega ulanish xatosi:', err.message);
+    process.exit(1);
+  }
 }
 
 app.get('/mangas', async (req, res) => {
   try {
+    if (!mega) {
+      return res.status(503).json({ error: 'Mega ulanishi tayyor emas' });
+    }
     const root = await mega.root;
     const mangasFolder = root.children.find(f => f.name === 'Mangas');
     if (!mangasFolder) return res.json([]);
@@ -47,12 +59,16 @@ app.get('/mangas', async (req, res) => {
     }
     res.json(mangas);
   } catch (err) {
+    console.error('/mangas xatosi:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
 app.get('/cover/:mangaId', async (req, res) => {
   try {
+    if (!mega) {
+      return res.status(503).json({ error: 'Mega ulanishi tayyor emas' });
+    }
     const root = await mega.root;
     const manga = root.children.find(f => f.name === 'Mangas').children.find(f => f.name === req.params.mangaId);
     const cover = manga.children.find(f => f.name === 'cover.jpg');
@@ -60,14 +76,18 @@ app.get('/cover/:mangaId', async (req, res) => {
       const buffer = await cover.downloadBuffer();
       res.set('Content-Type', 'image/jpeg');
       res.send(buffer);
+    } else {
+      res.status(404).send('Cover not found');
     }
   } catch (err) {
+    console.error('/cover xatosi:', err);
     res.status(404).send('Cover not found');
   }
 });
 
 connectMega().then(() => {
-  app.listen(process.env.PORT || 5000, () => {
-    console.log('Server running');
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => {
+    console.log(`🚀 Server running on port ${port}`);
   });
 });
