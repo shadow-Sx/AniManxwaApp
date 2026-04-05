@@ -1,5 +1,7 @@
-mega.py
 flask
 flask-cors
-python-dotenv
 gunicorn
+python-dotenv
+requests
+mega.py
+tenacity>=8.2.0
