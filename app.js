@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { Mega } = require('megajs');
+const Mega = require('megajs');
 const multer = require('multer');
 require('dotenv').config();
 
