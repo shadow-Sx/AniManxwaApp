@@ -1,7 +1,6 @@
-mega.py
 flask
 flask-cors
 python-dotenv
 gunicorn
-tenacity>=8.2.3
-pycryptodome
+requests
+megasdk
